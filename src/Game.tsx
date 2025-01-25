@@ -21,9 +21,9 @@ const Game: React.FC = () => {
       gameEngineRef.current.addEntity(randomPlayer);
 
       const handleKeyDown = (e: KeyboardEvent) =>
-        gameEngineRef.current?.handleInput(e.key, true);
+        gameEngineRef.current?.handleInput(e, true);
       const handleKeyUp = (e: KeyboardEvent) =>
-        gameEngineRef.current?.handleInput(e.key, false);
+        gameEngineRef.current?.handleInput(e, false);
 
       window.addEventListener("keydown", handleKeyDown);
       window.addEventListener("keyup", handleKeyUp);

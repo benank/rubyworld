@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run split-map && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-collision": "npx vite-node scripts/collision.ts"
+    "generate-collision": "npx vite-node scripts/collision.ts",
+    "split-map": "npx vite-node scripts/split_map.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^9.4.0",
