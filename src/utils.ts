@@ -10,7 +10,7 @@ export const downloadWithProgress = async (
 
   const contentLength = response.headers.get("content-length");
   if (!contentLength) {
-    throw new Error("Unable to determine file size.");
+    throw new Error(`Unable to determine file size for ${url}`);
   }
 
   const total = parseInt(contentLength, 10);
@@ -19,7 +19,7 @@ export const downloadWithProgress = async (
   const reader = response.body?.getReader();
 
   if (!reader) {
-    throw new Error("Unable to read the response body.");
+    throw new Error(`Failed to get reader for ${url}`);
   }
 
   const stream = new ReadableStream({
