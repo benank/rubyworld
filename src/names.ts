@@ -1,0 +1,58 @@
+import { faker } from "@faker-js/faker";
+
+const trainerNames: string[] = [
+  "Ace Trainer",
+  "Aroma Lady",
+  "Beauty",
+  "Biker",
+  "Bird Keeper",
+  "Black Belt",
+  "Bug Catcher",
+  "Bug Maniac",
+  "Camper",
+  "Channeler",
+  "Cooltrainer",
+  "Gambler",
+  "Cyclist",
+  "Fisher",
+  "Gambler",
+  "Gentleman",
+  "Guitarist",
+  "Hiker",
+  "Hex Maniac",
+  "Juggler",
+  "Kimono Girl",
+  "Lady",
+  "Lass",
+  "Ninja Boy",
+  "Picnicker",
+  "Pokémon Breeder",
+  "Pokémon Ranger",
+  "Psychic",
+  "Rich Boy",
+  "Ruin Maniac",
+  "Sailor",
+  "School Kid",
+  "Scientist",
+  "Sis and Bro",
+  "Swimmer",
+  "Tamer",
+  "Aqua Grunt",
+  "Magma Grunt",
+  "Aqua Admin",
+  "Magma Admin",
+  "Tuber",
+  "Twins",
+  "Young Couple",
+  "Youngster",
+  "Pokémon Trainer",
+  "Gym Leader",
+  "Elite Four",
+  "Champion",
+];
+
+export const getRandomTrainerName = () => {
+  return `${
+    trainerNames[Math.floor(Math.random() * trainerNames.length)]
+  } ${faker.person.firstName()}`;
+};

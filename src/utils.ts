@@ -1,30 +1,46 @@
-import { MAP_WIDTH, TILE_SIZE, MAP_HEIGHT } from "./config";
-import collision from "/assets/collision.txt";
+export const downloadWithProgress = async (
+  url: string,
+  onProgress: (progress: number, loaded: number, total: number) => void
+) => {
+  const response = await fetch(url);
 
-const MAX_X = MAP_WIDTH / TILE_SIZE;
-const MAX_Y = MAP_HEIGHT / TILE_SIZE;
-let collisionMap: string[][] = [];
-
-const loadCollisionMap = async () => {
-  const collisionFile: string | undefined = await (
-    await fetch(collision)
-  ).text();
-  collisionMap = collisionFile.split("\n").map((line) => line.split(""));
-};
-
-export const playerCanMoveTo = (x: number, y: number) => {
-  if (
-    x < 0 ||
-    x >= MAX_X ||
-    y < 0 ||
-    y >= MAX_Y ||
-    y >= collisionMap.length ||
-    x >= collisionMap[y].length
-  ) {
-    return false;
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
   }
 
-  return collisionMap[y][x] === "1";
-};
+  const contentLength = response.headers.get("content-length");
+  if (!contentLength) {
+    throw new Error("Unable to determine file size.");
+  }
 
-loadCollisionMap();
+  const total = parseInt(contentLength, 10);
+  let loaded = 0;
+
+  const reader = response.body?.getReader();
+
+  if (!reader) {
+    throw new Error("Unable to read the response body.");
+  }
+
+  const stream = new ReadableStream({
+    start(controller) {
+      async function push() {
+        const { done, value } = await reader!.read();
+        if (done) {
+          controller.close();
+          return;
+        }
+        loaded += value.length;
+        if (onProgress) {
+          onProgress(Math.min(99, (loaded / total) * 100), loaded, total); // Progress callback
+        }
+        controller.enqueue(value);
+        push();
+      }
+      push();
+    },
+  });
+
+  const blob = await new Response(stream).blob();
+  return blob; // Return the downloaded content as a Blob
+};

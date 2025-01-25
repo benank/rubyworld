@@ -1,4 +1,4 @@
-import { playerCanMoveTo } from "./utils";
+import { playerCanMoveTo } from "./collision";
 
 export class Player {
   public x: number;

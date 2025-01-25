@@ -2,6 +2,9 @@ import { Sprite } from "./Sprite";
 import { Player } from "./Player";
 import type { Entity } from "./Entity";
 import { TILE_SIZE, MAP_WIDTH, MAP_HEIGHT, MAP_IMAGE_URL } from "./config";
+import { getDefaultStore } from "jotai";
+import { backgroundImageLoadProgress, firstFrameRendered } from "./state";
+import { downloadWithProgress } from "./utils";
 
 export class GameEngine {
   private canvas: HTMLCanvasElement;
@@ -16,15 +19,16 @@ export class GameEngine {
   private cameraX = 0;
   private cameraY = 0;
   private backgroundImage!: HTMLImageElement;
+  private store = getDefaultStore();
+  private firstFrameRendered = false;
 
   private fixedDeltaTime: number = 1 / 60; // 60 updates per second
   private accumulator = 0;
 
-  constructor(canvas: HTMLCanvasElement, spriteMap: string) {
+  constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d")!;
     this.sprites = {};
-    this.loadSprites(spriteMap);
     this.player = new Player(
       Math.floor(this.mapWidth * 0.08),
       Math.floor(this.mapHeight * 0.65)
@@ -40,23 +44,18 @@ export class GameEngine {
     this.ctx.imageSmoothingEnabled = false;
   }
 
-  private loadSprites(spriteMap: string) {
-    const image = new Image();
-    image.src = spriteMap;
-    image.onload = () => {
-      const spriteSize = 16;
-      const spritesPerRow = image.width / spriteSize;
-      for (let i = 0; i < 256; i++) {
-        const x = (i % spritesPerRow) * spriteSize;
-        const y = Math.floor(i / spritesPerRow) * spriteSize;
-        this.sprites[i] = new Sprite(image, x, y, spriteSize, spriteSize);
-      }
-    };
-  }
-
-  private loadBackgroundImage() {
+  private async loadBackgroundImage() {
     this.backgroundImage = new Image();
-    this.backgroundImage.src = MAP_IMAGE_URL;
+    const downloadedImage = await downloadWithProgress(
+      MAP_IMAGE_URL,
+      (progress) => {
+        this.store.set(backgroundImageLoadProgress, progress);
+      }
+    );
+    const objectURL = URL.createObjectURL(downloadedImage);
+    this.backgroundImage.src = objectURL;
+
+    this.store.set(backgroundImageLoadProgress, 100);
   }
 
   public update(deltaTime: number) {
@@ -84,6 +83,15 @@ export class GameEngine {
   }
 
   public render() {
+    if (
+      this.canvas.width !== window.innerWidth ||
+      this.canvas.height !== window.innerHeight
+    ) {
+      this.canvas.width = window.innerWidth;
+      this.canvas.height = window.innerHeight;
+      this.ctx.imageSmoothingEnabled = false;
+    }
+
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.save();
     this.ctx.translate(-Math.round(this.cameraX), -Math.round(this.cameraY));
@@ -106,6 +114,11 @@ export class GameEngine {
     this.player.render(this.ctx, this.tileSize * this.scale);
 
     this.ctx.restore();
+
+    if (!this.firstFrameRendered) {
+      this.store.set(firstFrameRendered, true);
+      this.firstFrameRendered = true;
+    }
   }
 
   public handleInput(key: string, isKeyDown: boolean) {
