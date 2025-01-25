@@ -5,5 +5,8 @@ Realtime online 2D game world. Built with Cloudflare Durable Objects & Pages, Re
 ## Developing
 
 1. Install all packages with `npm install`
-2. Generate the tilemap with `npm run split-map`
-3. Run `npm run dev` to start the development server.
+2. Run `npm run dev` to start the development server.
+
+## Building
+
+1. Run `npm run build` to generate static files in `/dist`.
