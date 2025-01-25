@@ -1,6 +1,5 @@
 import { getDefaultStore } from "jotai";
 import { MAP_WIDTH, TILE_SIZE, MAP_HEIGHT } from "./config";
-import collision from "/assets/collision.txt";
 import { collisionLoadProgress, gameLoaded } from "./state";
 import { downloadWithProgress } from "./utils";
 
@@ -15,9 +14,12 @@ store.sub(gameLoaded, () => {
 });
 
 const loadCollisionMap = async () => {
-  const collisionFile = await downloadWithProgress(collision, (progress) => {
-    store.set(collisionLoadProgress, progress);
-  });
+  const collisionFile = await downloadWithProgress(
+    "/assets/collision.txt",
+    (progress) => {
+      store.set(collisionLoadProgress, progress);
+    }
+  );
   collisionMap = (await collisionFile.text())
     .split("\n")
     .map((line) => line.split(""));
