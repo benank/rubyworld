@@ -1,3 +1,5 @@
+import { Sprite } from "./Sprite"
+
 export class Entity {
     constructor(
       public x: number,
