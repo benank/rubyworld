@@ -5,7 +5,7 @@ export class Player {
   public y: number
   private targetX: number
   private targetY: number
-  private moveSpeed = 1.5 // Tiles per second
+  private moveSpeed = 2 // Tiles per second
   private isMoving = false
   private movementProgress = 0
   private currentDirection: string | null = null
@@ -98,10 +98,10 @@ export class Player {
     // Determine which frame to use based on movement progress
     let frameIndex
     if (this.isMoving) {
-      if (this.movementProgress < 0.1 || this.movementProgress > 0.9) {
+      if (this.movementProgress < 0.25 || this.movementProgress > 0.75) {
         frameIndex = 0 // Show non-alternating image briefly at start and end of movement
       } else {
-        frameIndex = (Math.floor((this.movementProgress - 0.1) * 2.5) % 2) + 1 // Alternate between 1 and 2 for walking
+        frameIndex = ((this.x + this.y) % 2) + 1 // Alternate between 1 and 2 for walking
       }
     } else {
       frameIndex = 0 // Use 0 for standing still
