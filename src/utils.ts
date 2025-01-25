@@ -3,8 +3,14 @@ import collision from "/assets/collision.txt";
 
 const MAX_X = MAP_WIDTH / TILE_SIZE;
 const MAX_Y = MAP_HEIGHT / TILE_SIZE;
-const collisionFile = await (await fetch(collision)).text();
-const collisionMap = collisionFile.split("\n").map((line) => line.split(""));
+let collisionMap: string[][] = [];
+
+const loadCollisionMap = async () => {
+  const collisionFile: string | undefined = await (
+    await fetch(collision)
+  ).text();
+  collisionMap = collisionFile.split("\n").map((line) => line.split(""));
+};
 
 export const playerCanMoveTo = (x: number, y: number) => {
   if (
@@ -20,3 +26,5 @@ export const playerCanMoveTo = (x: number, y: number) => {
 
   return collisionMap[y][x] === "1";
 };
+
+loadCollisionMap();
