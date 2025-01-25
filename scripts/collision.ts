@@ -26,6 +26,7 @@ async function classifyTiles(
       for (let x = 0; x < gridWidth; x++) {
         let tileType = 1; // Default to 1
 
+        let whiteFound = false;
         // Analyze the tile
         for (let ty = 0; ty < tileHeight; ty++) {
           for (let tx = 0; tx < tileWidth; tx++) {
@@ -43,9 +44,12 @@ async function classifyTiles(
             ) {
               tileType = 0;
             }
+            whiteFound ||= r == 255 && g == 255 && b == 255;
           }
           if (tileType === 0) break; //No need to check further rows in this tile if already classified
         }
+
+        if (!whiteFound) tileType = 0;
 
         row += tileType;
       }
