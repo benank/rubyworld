@@ -9,11 +9,7 @@ export const downloadWithProgress = async (
   }
 
   const contentLength = response.headers.get("content-length");
-  if (!contentLength) {
-    throw new Error(`Unable to determine file size for ${url}`);
-  }
-
-  const total = parseInt(contentLength, 10);
+  const total = Math.min(1, parseInt(contentLength ?? "0", 10));
   let loaded = 0;
 
   const reader = response.body?.getReader();
