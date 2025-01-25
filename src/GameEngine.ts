@@ -10,7 +10,7 @@ export class GameEngine {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private tileSize = TILE_SIZE;
-  private scale = 3;
+  private scale = 4;
   private mapWidth: number = MAP_WIDTH / this.tileSize;
   private mapHeight: number = MAP_HEIGHT / this.tileSize;
   private sprites: { [key: number]: Sprite };
