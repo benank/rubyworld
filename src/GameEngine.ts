@@ -1,11 +1,7 @@
 import { Sprite } from "./Sprite";
 import { Player } from "./Player";
 import type { Entity } from "./Entity";
-
-const TILE_SIZE = 16;
-const MAP_WIDTH = 12864;
-const MAP_HEIGHT = 6144;
-const MAP_IMAGE_URL = "assets/map.png";
+import { TILE_SIZE, MAP_WIDTH, MAP_HEIGHT, MAP_IMAGE_URL } from "./config";
 
 export class GameEngine {
   private canvas: HTMLCanvasElement;
