@@ -1,18 +1,13 @@
-import viteLogo from '/ruby.svg'
-import './App.css'
+import type React from "react"
+import Game from "./Game"
 
-function App() {
+const App: React.FC = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-      </div>
-      <h1>Ruby World</h1>
-      <p>Coming soon</p>
-    </>
+    <div className="App overflow-hidden">
+      <Game />
+    </div>
   )
 }
 
 export default App
+
