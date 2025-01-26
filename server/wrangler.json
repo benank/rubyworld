@@ -1,0 +1,24 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "rubyworld-server",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-01-24",
+	"migrations": [
+		{
+			"new_classes": ["RubyWorldServer"],
+			"tag": "v1"
+		}
+	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "RubyWorldServer",
+				"name": "RubyWorldServer"
+			}
+		]
+	},
+	"observability": {
+		"enabled": true
+	},
+	"placement": { "mode": "smart" }
+}

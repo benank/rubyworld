@@ -1,4 +1,5 @@
 {
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "rubyworld",
   "compatibility_date": "2025-01-24",
   "pages_build_output_dir": "dist",

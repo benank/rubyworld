@@ -2,6 +2,8 @@ import { getDefaultStore } from "jotai";
 import { playerCanMoveTo } from "./collision";
 import { teleportPosition } from "./state";
 import { GameEngine } from "./GameEngine";
+import socket from "./socket";
+import { ClientPacketType, ClientPlayerMovePacket } from "./packets";
 
 export class Player {
   public x: number;
@@ -28,8 +30,7 @@ export class Player {
   private loadedSprites = false;
 
   constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
+    this.setPosition(x, y);
     this.targetX = x;
     this.targetY = y;
     this.preloadSprites();
@@ -40,6 +41,18 @@ export class Player {
         this.store.get(teleportPosition).y * GameEngine.mapHeight
       );
     });
+  }
+
+  private setPosition(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+    socket.send(
+      JSON.stringify({
+        type: ClientPacketType.PlayerMove,
+        x,
+        y,
+      } satisfies ClientPlayerMovePacket)
+    );
   }
 
   private preloadSprites() {
@@ -89,8 +102,7 @@ export class Player {
     if (this.isMoving) {
       this.movementProgress += this.moveSpeed * dt;
       if (this.movementProgress >= 1) {
-        this.x = this.targetX;
-        this.y = this.targetY;
+        this.setPosition(this.targetX, this.targetY);
         this.isMoving = false;
         this.movementProgress = 0;
 
@@ -105,8 +117,7 @@ export class Player {
   }
 
   teleport(x: number, y: number) {
-    this.x = Math.floor(x);
-    this.y = Math.floor(y);
+    this.setPosition(Math.floor(x), Math.floor(y));
 
     this.isMoving = false;
     this.movementProgress = 0;
