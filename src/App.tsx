@@ -16,6 +16,7 @@ import minimap from "/assets/minimap.png";
 import "./App.css";
 import { useAtom } from "jotai";
 import { teleportPosition } from "./state";
+import MusicPlayer from "./components/MusicPlayer";
 
 const App: React.FC = () => {
   const [_, setTpPos] = useAtom(teleportPosition);
@@ -31,6 +32,7 @@ const App: React.FC = () => {
 
   return (
     <div className="App overflow-hidden relative bg-black">
+      <MusicPlayer />
       <Game />
       <div className="absolute top-0 right-0 z-10 m-4">
         <Drawer>
