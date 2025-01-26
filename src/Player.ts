@@ -1,16 +1,20 @@
+import { getDefaultStore } from "jotai";
 import { playerCanMoveTo } from "./collision";
+import { teleportPosition } from "./state";
+import { GameEngine } from "./GameEngine";
 
 export class Player {
   public x: number;
   public y: number;
   private targetX: number;
   private targetY: number;
-  private _moveSpeed = 2; // Tiles per second
+  private _moveSpeed = 3; // Tiles per second
   private isMoving = false;
   private movementProgress = 0;
   private currentDirection: string | null = null;
   private facingDirection: "left" | "right" | "up" | "down" = "down";
   private speedUp = false;
+  private store = getDefaultStore();
 
   private sprites: {
     [key: string]: HTMLImageElement[];
@@ -29,6 +33,13 @@ export class Player {
     this.targetX = x;
     this.targetY = y;
     this.preloadSprites();
+
+    this.store.sub(teleportPosition, () => {
+      this.teleport(
+        this.store.get(teleportPosition).x * GameEngine.mapWidth,
+        this.store.get(teleportPosition).y * GameEngine.mapHeight
+      );
+    });
   }
 
   private preloadSprites() {
@@ -93,6 +104,14 @@ export class Player {
     }
   }
 
+  teleport(x: number, y: number) {
+    this.x = Math.floor(x);
+    this.y = Math.floor(y);
+
+    this.isMoving = false;
+    this.movementProgress = 0;
+  }
+
   render(ctx: CanvasRenderingContext2D, tileSize: number) {
     if (!this.loadedSprites) {
       // Render a placeholder if sprites are not loaded
@@ -131,7 +150,20 @@ export class Player {
 
   handleInput(e: KeyboardEvent, isKeyDown: boolean) {
     const key = e.key;
-    const moveKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d", "W", "A", "S", "D"];
+    const moveKeys = [
+      "ArrowUp",
+      "ArrowDown",
+      "ArrowLeft",
+      "ArrowRight",
+      "w",
+      "a",
+      "s",
+      "d",
+      "W",
+      "A",
+      "S",
+      "D",
+    ];
 
     if (moveKeys.includes(key)) {
       if (isKeyDown) {
@@ -145,7 +177,6 @@ export class Player {
       e.stopPropagation();
     }
   }
-
 
   private startMove(direction: string) {
     if (this.isMoving) return;

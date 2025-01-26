@@ -2,6 +2,7 @@ import { getDefaultStore } from "jotai";
 import { MAP_WIDTH, TILE_SIZE, MAP_HEIGHT } from "./config";
 import { collisionLoadProgress, gameLoaded } from "./state";
 import { downloadWithProgress } from "./utils";
+import collisionPath from "/assets/collision.txt";
 
 const store = getDefaultStore();
 
@@ -15,7 +16,7 @@ store.sub(gameLoaded, () => {
 
 const loadCollisionMap = async () => {
   const collisionFile = await downloadWithProgress(
-    "/assets/collision.txt",
+    collisionPath,
     (progress) => {
       store.set(collisionLoadProgress, progress);
     }
@@ -32,8 +33,8 @@ export const playerCanMoveTo = (x: number, y: number) => {
     x >= MAX_X ||
     y < 0 ||
     y >= MAX_Y ||
-    y >= collisionMap.length ||
-    x >= collisionMap[y].length
+    y >= (collisionMap.length ?? 0) ||
+    x >= (collisionMap[y]?.length ?? 0)
   ) {
     return false;
   }

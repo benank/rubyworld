@@ -12,3 +12,4 @@ export const gameLoaded = atom(
     get(collisionLoadProgress) === 100 &&
     get(firstFrameRendered)
 );
+export const teleportPosition = atom({ x: 0, y: 0 }); 

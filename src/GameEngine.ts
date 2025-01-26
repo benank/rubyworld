@@ -11,10 +11,10 @@ const VISIBLE_CHUNKS = 5; // 5x5 square around the camera
 export class GameEngine {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private tileSize = TILE_SIZE;
-  private scale = 4;
-  private mapWidth: number = MAP_WIDTH / this.tileSize;
-  private mapHeight: number = MAP_HEIGHT / this.tileSize;
+  public static readonly tileSize = TILE_SIZE;
+  public static readonly scale = 4;
+  public static readonly mapWidth: number = MAP_WIDTH / this.tileSize;
+  public static readonly mapHeight: number = MAP_HEIGHT / this.tileSize;
   private sprites: { [key: number]: Sprite };
   private player: Player;
   private entities: Entity[];
@@ -33,8 +33,8 @@ export class GameEngine {
     this.ctx = canvas.getContext("2d")!;
     this.sprites = {};
     this.player = new Player(
-      Math.floor(this.mapWidth * 0.08),
-      Math.floor(this.mapHeight * 0.65)
+      Math.floor(GameEngine.mapWidth * 0.08),
+      Math.floor(GameEngine.mapHeight * 0.65)
     );
     this.entities = [];
     this.setupCanvas();
@@ -72,8 +72,8 @@ export class GameEngine {
   }
 
   private async loadVisibleChunks() {
-    const centerX = Math.floor(this.cameraX / (CHUNK_SIZE * this.scale));
-    const centerY = Math.floor(this.cameraY / (CHUNK_SIZE * this.scale));
+    const centerX = Math.floor(this.cameraX / (CHUNK_SIZE * GameEngine.scale));
+    const centerY = Math.floor(this.cameraY / (CHUNK_SIZE * GameEngine.scale));
 
     const visibleChunkKeys = new Set<string>();
 
@@ -111,12 +111,14 @@ export class GameEngine {
     }
 
     // Update loading progress
-    const totalChunks = VISIBLE_CHUNKS * VISIBLE_CHUNKS;
-    const loadedChunks = [...visibleChunkKeys].filter((key) =>
-      this.chunks.has(key)
-    ).length;
-    const progress = Math.round((loadedChunks / totalChunks) * 100);
-    this.store.set(backgroundImageLoadProgress, progress);
+    if (this.store.get(backgroundImageLoadProgress) < 100) {
+      const totalChunks = VISIBLE_CHUNKS * VISIBLE_CHUNKS;
+      const loadedChunks = [...visibleChunkKeys].filter((key) =>
+        this.chunks.has(key)
+      ).length;
+      const progress = Math.round((loadedChunks / totalChunks) * 100);
+      this.store.set(backgroundImageLoadProgress, progress);
+    }
   }
 
   public update(deltaTime: number) {
@@ -139,9 +141,11 @@ export class GameEngine {
   private updateCamera() {
     const playerPos = this.player.getPosition();
     this.cameraX =
-      playerPos.x * this.tileSize * this.scale - this.canvas.width / 2;
+      playerPos.x * GameEngine.tileSize * GameEngine.scale -
+      this.canvas.width / 2;
     this.cameraY =
-      playerPos.y * this.tileSize * this.scale - this.canvas.height / 2;
+      playerPos.y * GameEngine.tileSize * GameEngine.scale -
+      this.canvas.height / 2;
   }
 
   public render() {
@@ -159,12 +163,16 @@ export class GameEngine {
     this.ctx.translate(-Math.round(this.cameraX), -Math.round(this.cameraY));
 
     // Render visible chunks
-    const startX = Math.floor(this.cameraX / (CHUNK_SIZE * this.scale));
-    const startY = Math.floor(this.cameraY / (CHUNK_SIZE * this.scale));
+    const startX = Math.floor(this.cameraX / (CHUNK_SIZE * GameEngine.scale));
+    const startY = Math.floor(this.cameraY / (CHUNK_SIZE * GameEngine.scale));
     const endX =
-      startX + Math.ceil(this.canvas.width / (CHUNK_SIZE * this.scale)) + 1;
+      startX +
+      Math.ceil(this.canvas.width / (CHUNK_SIZE * GameEngine.scale)) +
+      1;
     const endY =
-      startY + Math.ceil(this.canvas.height / (CHUNK_SIZE * this.scale)) + 1;
+      startY +
+      Math.ceil(this.canvas.height / (CHUNK_SIZE * GameEngine.scale)) +
+      1;
 
     for (let y = startY; y < endY; y++) {
       for (let x = startX; x < endX; x++) {
@@ -175,10 +183,10 @@ export class GameEngine {
         if (chunk) {
           this.ctx.drawImage(
             chunk,
-            chunkX * this.scale,
-            chunkY * this.scale,
-            CHUNK_SIZE * this.scale,
-            CHUNK_SIZE * this.scale
+            chunkX * GameEngine.scale,
+            chunkY * GameEngine.scale,
+            CHUNK_SIZE * GameEngine.scale,
+            CHUNK_SIZE * GameEngine.scale
           );
         }
       }
@@ -186,11 +194,15 @@ export class GameEngine {
 
     // Render entities
     this.entities.forEach((entity) => {
-      entity.render(this.ctx, this.tileSize * this.scale, this.sprites);
+      entity.render(
+        this.ctx,
+        GameEngine.tileSize * GameEngine.scale,
+        this.sprites
+      );
     });
 
     // Render player
-    this.player.render(this.ctx, this.tileSize * this.scale);
+    this.player.render(this.ctx, GameEngine.tileSize * GameEngine.scale);
 
     this.ctx.restore();
 
@@ -216,6 +228,6 @@ export class GameEngine {
   }
 
   public getMapSize() {
-    return { width: this.mapWidth, height: this.mapHeight };
+    return { width: GameEngine.mapWidth, height: GameEngine.mapHeight };
   }
 }
