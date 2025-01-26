@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 
 const MusicPlayer: React.FC = () => {
+  const [canPlay, setCanPlay] = useState(false);
+
   // Music by Lud and Schlatts Musical Emporium
   const songs = [
     "/assets/music/2PM-PM-Music.mp3",
@@ -13,14 +15,25 @@ const MusicPlayer: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    const onClick = () => {
+      setCanPlay(true);
+      document.removeEventListener("click", onClick);
+    };
+    document.addEventListener("click", onClick);
+    return () => {
+      document.removeEventListener("click", onClick);
+    };
+  }, []);
+
+  useEffect(() => {
     if (audioRef.current) audioRef.current.volume = 0.5;
   }, [audioRef.current]);
 
   useEffect(() => {
-    if (audioRef.current) {
+    if (audioRef.current && canPlay) {
       audioRef.current.play();
     }
-  }, [currentSongIndex]);
+  }, [currentSongIndex, canPlay]);
 
   // Automatically play the next song when the current song ends
   const handleSongEnd = () => {
