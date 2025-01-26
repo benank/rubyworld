@@ -30,10 +30,12 @@ export class Player {
   private loadedSprites = false;
 
   constructor(x: number, y: number) {
-    this.setPosition(x, y);
+    this.x = x;
+    this.y = y;
     this.targetX = x;
     this.targetY = y;
     this.preloadSprites();
+    this.setPosition(x, y);
 
     this.store.sub(teleportPosition, () => {
       this.teleport(
