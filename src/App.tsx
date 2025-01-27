@@ -1,7 +1,7 @@
 import * as React from "react";
 import Game from "./Game";
 import { Button } from "./components/ui/button";
-import { MapIcon, RefreshCwIcon } from "lucide-react";
+import { MapIcon, RefreshCwIcon, Volume2Icon, VolumeIcon } from "lucide-react";
 import {
   Drawer,
   DrawerClose,
@@ -15,7 +15,13 @@ import {
 import minimap from "/assets/minimap.png";
 import "./App.css";
 import { useAtom } from "jotai";
-import { isInGame, playerName, spriteIndex, teleportPosition } from "./state";
+import {
+  isInGame,
+  musicVolume,
+  playerName,
+  spriteIndex,
+  teleportPosition,
+} from "./state";
 import MusicPlayer from "./components/MusicPlayer";
 import {
   Dialog,
@@ -27,12 +33,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "./components/ui/input";
 import { getRandomTrainerName } from "./names";
+import { useState } from "react";
+import { Slider } from "./components/ui/slider";
 
 const App: React.FC = () => {
   const [_, setTpPos] = useAtom(teleportPosition);
   const [name, setName] = useAtom(playerName);
   const [inGame, setIsInGame] = useAtom(isInGame);
   const [sprite, setSprite] = useAtom(spriteIndex);
+  const [volume, setVolume] = useAtom(musicVolume);
+  const [volumeOpen, setVolumeOpen] = useState(false);
 
   const handleMapClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
     const trimPixels = { top: 32, left: 8, bottom: 24, right: 30 };
@@ -51,7 +61,27 @@ const App: React.FC = () => {
     <div className="App overflow-hidden relative bg-black">
       <MusicPlayer />
       <Game />
-      <div className="absolute top-0 right-0 z-10 m-4">
+      <div className="absolute top-0 right-0 z-10 m-2 flex flex-row gap-2">
+        <div className="flex flex-col items-center gap-2">
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={() => setVolumeOpen(!volumeOpen)}
+          >
+            <Volume2Icon />
+          </Button>
+          {volumeOpen && (
+            <Slider
+              defaultValue={[volume]}
+              min={0}
+              max={1}
+              step={0.05}
+              orientation="vertical"
+              className="h-20 w-1.5"
+              onValueChange={(value) => setVolume(value[0])}
+            />
+          )}
+        </div>
         <Drawer>
           <DrawerTrigger asChild>
             <Button variant="secondary" size="icon">

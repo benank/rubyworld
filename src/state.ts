@@ -17,3 +17,4 @@ export const teleportPosition = atom({ x: 0, y: 0 });
 export const playerName = atom(getRandomTrainerName());
 export const isInGame = atom(false);
 export const spriteIndex = atom(1);
+export const musicVolume = atom(0.5);

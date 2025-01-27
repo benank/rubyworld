@@ -1,3 +1,5 @@
+import { musicVolume } from "@/state";
+import { useAtom } from "jotai";
 import React, { useState, useRef, useEffect } from "react";
 
 const MusicPlayer: React.FC = () => {
@@ -13,6 +15,13 @@ const MusicPlayer: React.FC = () => {
 
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [volume] = useAtom(musicVolume);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
 
   useEffect(() => {
     const onClick = () => {
