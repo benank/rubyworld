@@ -63,5 +63,4 @@ async function classifyTiles(
   }
 }
 
-// Example usage:
 classifyTiles("public/assets/map_collision.png", "public/assets/collision.txt");

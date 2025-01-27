@@ -1,6 +1,6 @@
 import { routePartykitRequest, Server } from 'partyserver';
 import type { Connection, WSMessage } from 'partyserver';
-import { ClientPacketType, ServerPacketType } from '../../src/packets';
+import { ClientPacketType, ServerPacketType } from '../../src/game/packets';
 import type {
 	ClientPacket,
 	ClientPlayerChatPacket,
@@ -13,11 +13,10 @@ import type {
 	ServerPlayerMovePacket,
 	ServerPlayerRemovePacket,
 	ServerPlayerSpawnPacket,
-} from '../../src/packets';
+} from '../../src/game/packets';
 
 type ThisEnv = Env & Record<string, DurableObjectNamespace>;
 
-// Define your Server
 export class RubyWorldServer extends Server {
 	private players: Record<string, ServerPlayer> = {};
 
@@ -129,7 +128,6 @@ export class RubyWorldServer extends Server {
 }
 
 export default {
-	// Set up your fetch handler to use configured Servers
 	async fetch(request: Request, env: ThisEnv): Promise<Response> {
 		return (await routePartykitRequest(request, env)) || new Response('Not Found', { status: 404 });
 	},
