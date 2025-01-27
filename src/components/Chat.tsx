@@ -78,7 +78,7 @@ const Chat: React.FC = () => {
           </Button>
         )}
         {isMobileInputVisible && (
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background">
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background z-30">
             <div className="flex items-center space-x-2">
               <Input
                 ref={inputRef}
