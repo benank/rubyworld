@@ -16,7 +16,7 @@ import {
 } from "./packets";
 
 const CHUNK_SIZE = 192;
-const VISIBLE_CHUNKS = 5; // 5x5 square around the camera
+const VISIBLE_CHUNKS = 8; // 8x8 square around the camera
 
 export class GameEngine {
   private canvas: HTMLCanvasElement;
