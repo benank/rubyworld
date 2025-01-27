@@ -1,24 +1,21 @@
-import { getDefaultStore } from "jotai";
-import { playerCanMoveTo } from "./collision";
-import { teleportPosition } from "./state";
-import { GameEngine } from "./GameEngine";
-import socket from "./socket";
-import { ClientPacketType, ClientPlayerMovePacket } from "./packets";
+import { ServerPlayer } from "./packets";
 
 export class Player {
+  public readonly id: string;
+  public readonly name: string;
+  public readonly spriteIndex: number;
   public x: number;
   public y: number;
-  private targetX: number;
-  private targetY: number;
-  private _moveSpeed = 3; // Tiles per second
-  private isMoving = false;
-  private movementProgress = 0;
-  private currentDirection: string | null = null;
-  private facingDirection: "left" | "right" | "up" | "down" = "down";
-  private speedUp = false;
-  private store = getDefaultStore();
+  protected targetX: number;
+  protected targetY: number;
+  protected _moveSpeed = 3; // Tiles per second
+  protected isMoving = false;
+  protected isLocalPlayer = false;
+  protected movementProgress = 0;
+  protected facingDirection: "left" | "right" | "up" | "down" = "down";
+  protected speedUp = false;
 
-  private sprites: {
+  protected sprites: {
     [key: string]: HTMLImageElement[];
   } = {
     left: [],
@@ -27,37 +24,20 @@ export class Player {
     down: [],
   };
 
-  private loadedSprites = false;
+  protected loadedSprites = false;
 
-  constructor(x: number, y: number) {
+  constructor({ id, x, y, name, spriteIndex }: ServerPlayer) {
+    this.id = id;
+    this.name = name;
+    this.spriteIndex = spriteIndex;
     this.x = x;
     this.y = y;
     this.targetX = x;
     this.targetY = y;
     this.preloadSprites();
-    this.setPosition(x, y);
-
-    this.store.sub(teleportPosition, () => {
-      this.teleport(
-        this.store.get(teleportPosition).x * GameEngine.mapWidth,
-        this.store.get(teleportPosition).y * GameEngine.mapHeight
-      );
-    });
   }
 
-  private setPosition(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-    socket.send(
-      JSON.stringify({
-        type: ClientPacketType.PlayerMove,
-        x,
-        y,
-      } satisfies ClientPlayerMovePacket)
-    );
-  }
-
-  private preloadSprites() {
+  protected preloadSprites() {
     const directions = ["left", "up", "down", "right"];
     const types = ["", "_1", "_2"];
     let loadedCount = 0;
@@ -96,7 +76,7 @@ export class Player {
     });
   }
 
-  private get moveSpeed() {
+  protected get moveSpeed() {
     return this.speedUp ? this._moveSpeed * 5 : this._moveSpeed;
   }
 
@@ -104,25 +84,12 @@ export class Player {
     if (this.isMoving) {
       this.movementProgress += this.moveSpeed * dt;
       if (this.movementProgress >= 1) {
-        this.setPosition(this.targetX, this.targetY);
+        this.x = this.targetX;
+        this.y = this.targetY;
         this.isMoving = false;
         this.movementProgress = 0;
-
-        if (this.currentDirection) {
-          this.startMove(this.currentDirection);
-        }
       }
-    } else if (this.currentDirection) {
-      // If not moving but a direction is set, start moving
-      this.startMove(this.currentDirection);
     }
-  }
-
-  teleport(x: number, y: number) {
-    this.setPosition(Math.floor(x), Math.floor(y));
-
-    this.isMoving = false;
-    this.movementProgress = 0;
   }
 
   render(ctx: CanvasRenderingContext2D, tileSize: number) {
@@ -161,77 +128,26 @@ export class Player {
     ctx.drawImage(sprite, drawX, drawY, tileSize, tileSize * 2);
   }
 
-  handleInput(e: KeyboardEvent, isKeyDown: boolean) {
-    const key = e.key;
-    const moveKeys = [
-      "ArrowUp",
-      "ArrowDown",
-      "ArrowLeft",
-      "ArrowRight",
-      "w",
-      "a",
-      "s",
-      "d",
-      "W",
-      "A",
-      "S",
-      "D",
-    ];
-
-    if (moveKeys.includes(key)) {
-      if (isKeyDown) {
-        this.currentDirection = key;
-      } else if (key === this.currentDirection) {
-        this.currentDirection = null;
-      }
-    } else if (key === " ") {
-      this.speedUp = isKeyDown;
-      e.preventDefault();
-      e.stopPropagation();
+  moveTo(newX: number, newY: number) {
+    if (!this.isLocalPlayer) {
+      // Make remote players fast if they move fast
+      this.speedUp = this.isMoving || this.movementProgress > 0;
     }
-  }
 
-  private startMove(direction: string) {
-    if (this.isMoving) return;
-
-    let dx = 0;
-    let dy = 0;
-
-    switch (direction) {
-      case "ArrowUp":
-      case "w":
-      case "W":
-        dy = -1;
-        this.facingDirection = "up";
-        break;
-      case "ArrowDown":
-      case "s":
-      case "S":
-        dy = 1;
-        this.facingDirection = "down";
-        break;
-      case "ArrowLeft":
-      case "a":
-      case "A":
-        dx = -1;
-        this.facingDirection = "left";
-        break;
-      case "ArrowRight":
-      case "d":
-      case "D":
-        dx = 1;
-        this.facingDirection = "right";
-        break;
-    }
+    const dx = newX - this.x;
+    const dy = newY - this.y;
 
     if (dx !== 0 || dy !== 0) {
-      const newX = this.x + dx;
-      const newY = this.y + dy;
-      if (playerCanMoveTo(newX, newY)) {
-        this.targetX = newX;
-        this.targetY = newY;
-        this.isMoving = true;
-        this.movementProgress = 0;
+      this.targetX = newX;
+      this.targetY = newY;
+      this.isMoving = true;
+      this.movementProgress = 0;
+
+      // Determine facing direction
+      if (Math.abs(dx) > Math.abs(dy)) {
+        this.facingDirection = dx > 0 ? "right" : "left";
+      } else {
+        this.facingDirection = dy > 0 ? "down" : "up";
       }
     }
   }

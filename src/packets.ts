@@ -38,36 +38,48 @@ export enum ServerPacketType {
   PlayerSpawn = 2,
   PlayerRemove = 3,
   PlayerChat = 4,
+  Init = 5,
+}
+
+export interface ServerPlayer {
+  id: string;
+  name: string;
+  spriteIndex: number;
+  x: number;
+  y: number;
 }
 
 export interface ServerPlayerMovePacket {
   type: ServerPacketType.PlayerMove;
-  id: number;
+  id: string;
   x: number;
   y: number;
 }
 
-export interface PlayerSpawnPacket {
+export interface ServerPlayerSpawnPacket {
   type: ServerPacketType.PlayerSpawn;
-  id: number;
-  x: number;
-  y: number;
-  name: string;
-  spriteIndex: number;
+  player: ServerPlayer;
 }
 
 export interface ServerPlayerRemovePacket {
   type: ServerPacketType.PlayerRemove;
-  id: number;
+  id: string;
 }
 
 export interface ServerPlayerChatPacket {
   type: ServerPacketType.PlayerChat;
-  id: number;
+  id: string;
   message: string;
+}
+
+export interface ServerInitPacket {
+  type: ServerPacketType.Init;
+  players: ServerPlayer[];
 }
 
 export type ServerPacket =
   | ServerPlayerMovePacket
   | ServerPlayerChatPacket
-  | ServerPlayerRemovePacket;
+  | ServerPlayerRemovePacket
+  | ServerInitPacket
+  | ServerPlayerSpawnPacket;

@@ -1,9 +1,14 @@
-import type { Sprite } from "./Sprite";
 import { Player } from "./Player";
-import type { Entity } from "./Entity";
 import { TILE_SIZE, MAP_WIDTH, MAP_HEIGHT } from "./config";
 import { getDefaultStore } from "jotai";
 import { backgroundImageLoadProgress, firstFrameRendered } from "./state";
+import { LocalPlayer } from "./LocalPlayer";
+import socket from "./socket";
+import {
+  ServerPacket,
+  ServerPacketType,
+  ServerPlayerMovePacket,
+} from "./packets";
 
 const CHUNK_SIZE = 192;
 const VISIBLE_CHUNKS = 5; // 5x5 square around the camera
@@ -15,9 +20,8 @@ export class GameEngine {
   public static readonly scale = 4;
   public static readonly mapWidth: number = MAP_WIDTH / this.tileSize;
   public static readonly mapHeight: number = MAP_HEIGHT / this.tileSize;
-  private sprites: { [key: number]: Sprite };
-  private player: Player;
-  private entities: Entity[];
+  private localPlayer: LocalPlayer;
+  private players: Player[] = [];
   private cameraX = 0;
   private cameraY = 0;
   private chunks: Map<string, HTMLImageElement> = new Map();
@@ -31,13 +35,32 @@ export class GameEngine {
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d")!;
-    this.sprites = {};
-    this.player = new Player(
-      Math.floor(GameEngine.mapWidth * 0.08),
-      Math.floor(GameEngine.mapHeight * 0.65)
+    this.localPlayer = new LocalPlayer(
+      Math.floor(Math.random() * 12) + 55,
+      Math.floor(Math.random() * 3) + 249,
+      this
     );
-    this.entities = [];
     this.setupCanvas();
+    socket.recv(this.onServerPacket.bind(this));
+  }
+
+  private onServerPacket(packet: ServerPacket) {
+    switch (packet.type) {
+      case ServerPacketType.PlayerMove:
+        this.movePlayer(packet);
+        break;
+      case ServerPacketType.Init:
+        this.players = packet.players.map((p) => new Player(p));
+        break;
+      case ServerPacketType.PlayerRemove:
+        this.removePlayer(packet.id);
+        break;
+      case ServerPacketType.PlayerSpawn:
+        this.addPlayer(new Player(packet.player));
+        break;
+      case ServerPacketType.PlayerChat:
+        break;
+    }
   }
 
   private setupCanvas() {
@@ -134,12 +157,12 @@ export class GameEngine {
   }
 
   private fixedUpdate(dt: number) {
-    this.player.update(dt);
-    this.entities.forEach((entity) => entity.update(dt));
+    this.localPlayer.update(dt);
+    this.players.forEach((entity) => entity.update(dt));
   }
 
   private updateCamera() {
-    const playerPos = this.player.getPosition();
+    const playerPos = this.localPlayer.getPosition();
     this.cameraX =
       playerPos.x * GameEngine.tileSize * GameEngine.scale -
       this.canvas.width / 2;
@@ -192,17 +215,13 @@ export class GameEngine {
       }
     }
 
-    // Render entities
-    this.entities.forEach((entity) => {
-      entity.render(
-        this.ctx,
-        GameEngine.tileSize * GameEngine.scale,
-        this.sprites
-      );
+    // Render players
+    this.players.forEach((player) => {
+      player.render(this.ctx, GameEngine.tileSize * GameEngine.scale);
     });
 
-    // Render player
-    this.player.render(this.ctx, GameEngine.tileSize * GameEngine.scale);
+    // Render local player
+    this.localPlayer.render(this.ctx, GameEngine.tileSize * GameEngine.scale);
 
     this.ctx.restore();
 
@@ -213,21 +232,31 @@ export class GameEngine {
   }
 
   public handleInput(e: KeyboardEvent, isKeyDown: boolean) {
-    this.player.handleInput(e, isKeyDown);
+    this.localPlayer.handleInput(e, isKeyDown);
   }
 
-  public addEntity(entity: Entity) {
-    this.entities.push(entity);
+  public addPlayer(player: Player) {
+    this.players.push(player);
   }
 
-  public moveEntity(index: number, newX: number, newY: number) {
-    if (index >= 0 && index < this.entities.length) {
-      this.entities[index].x = newX;
-      this.entities[index].y = newY;
-    }
+  public removePlayer(id: string) {
+    this.players = this.players.filter((p) => p.id !== id);
+  }
+
+  public movePlayer(packet: ServerPlayerMovePacket) {
+    const player = this.players.find((p) => p.id === packet.id);
+    player?.moveTo(packet.x, packet.y);
+  }
+
+  public isSpaceFree(x: number, y: number) {
+    return !this.players.some((p) => p.x === x && p.y === y);
   }
 
   public getMapSize() {
     return { width: GameEngine.mapWidth, height: GameEngine.mapHeight };
+  }
+
+  public destroy() {
+    socket.removeAllListeners();
   }
 }

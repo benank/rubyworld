@@ -1,5 +1,6 @@
 import { PartySocket } from "partysocket";
 import { isDev } from "./env";
+import { ClientPacket, ServerPacket } from "./packets";
 
 const HOST_URL = isDev
   ? "http://localhost:8787"
@@ -9,6 +10,7 @@ const ROOM = "ruby-world-main";
 
 class Socket {
   private socket: PartySocket;
+  private messageListeners: Array<(packet: ServerPacket) => void> = [];
 
   constructor() {
     this.socket = new PartySocket({
@@ -17,30 +19,44 @@ class Socket {
       room: ROOM,
     });
 
-    this.socket.addEventListener("message", this.onMessage);
-    this.socket.addEventListener("open", this.onOpen);
-    this.socket.addEventListener("close", this.onClose);
-    this.socket.addEventListener("error", this.onError);
+    this.socket.addEventListener("message", this.onMessage.bind(this));
+    this.socket.addEventListener("open", this.onOpen.bind(this));
+    this.socket.addEventListener("close", this.onClose.bind(this));
+    this.socket.addEventListener("error", this.onError.bind(this));
   }
 
-  send(message: string) {
+  private onMessage(event: MessageEvent) {
+    this.messageListeners.forEach((listener) => {
+      listener(JSON.parse(event.data) as ServerPacket);
+    });
+  }
+
+  public removeAllListeners() {
+    this.messageListeners = [];
+  }
+
+  public send(message: ClientPacket) {
+    this.sendMessage(JSON.stringify(message));
+  }
+
+  public recv(callback: (packet: ServerPacket) => void) {
+    this.messageListeners.push(callback);
+  }
+
+  private sendMessage(message: string) {
     this.socket.send(message);
   }
 
-  onOpen() {
+  private onOpen() {
     console.log("Socket opened");
   }
 
-  onClose() {
+  private onClose() {
     console.log("Socket closed");
   }
 
-  onError(error: Event) {
+  private onError(error: Event) {
     console.error("Socket error", error);
-  }
-
-  onMessage(event: MessageEvent) {
-    console.log("Message received", event.data);
   }
 }
 

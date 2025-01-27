@@ -1,52 +1,53 @@
 import type React from "react";
 import { useRef, useEffect } from "react";
 import { GameEngine } from "./GameEngine";
-import { RandomPlayer } from "./RandomPlayer";
 
 const Game: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameEngineRef = useRef<GameEngine | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
+    let gameEngine: GameEngine | null = null;
+
     if (canvasRef.current) {
-      gameEngineRef.current = new GameEngine(canvasRef.current);
-
-      const { width, height } = gameEngineRef.current.getMapSize();
-      const randomPlayer = new RandomPlayer(
-        Math.floor(Math.random() * width),
-        Math.floor(Math.random() * height),
-        width,
-        height
-      );
-      gameEngineRef.current.addEntity(randomPlayer);
-
-      const handleKeyDown = (e: KeyboardEvent) =>
-        gameEngineRef.current?.handleInput(e, true);
-      const handleKeyUp = (e: KeyboardEvent) =>
-        gameEngineRef.current?.handleInput(e, false);
-
-      window.addEventListener("keydown", handleKeyDown);
-      window.addEventListener("keyup", handleKeyUp);
-
-      let lastTime = performance.now();
-
-      const gameLoop = (currentTime: number) => {
-        const deltaTime = (currentTime - lastTime) / 1000;
-        lastTime = currentTime;
-
-        gameEngineRef.current?.update(deltaTime);
-        gameEngineRef.current?.render();
-
-        requestAnimationFrame(gameLoop);
-      };
-
-      requestAnimationFrame(gameLoop);
-
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-        window.removeEventListener("keyup", handleKeyUp);
-      };
+      gameEngine = new GameEngine(canvasRef.current);
+      gameEngineRef.current = gameEngine;
     }
+
+    const handleKeyDown = (e: KeyboardEvent) =>
+      gameEngine?.handleInput(e, true);
+    const handleKeyUp = (e: KeyboardEvent) => gameEngine?.handleInput(e, false);
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    let lastTime = performance.now();
+
+    const gameLoop = (currentTime: number) => {
+      const deltaTime = (currentTime - lastTime) / 1000;
+      lastTime = currentTime;
+
+      gameEngine?.update(deltaTime);
+      gameEngine?.render();
+
+      animationFrameRef.current = requestAnimationFrame(gameLoop);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(gameLoop);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+
+      if (gameEngine) {
+        gameEngine.destroy();
+      }
+    };
   }, []);
 
   return (
@@ -56,5 +57,4 @@ const Game: React.FC = () => {
     </div>
   );
 };
-
 export default Game;
