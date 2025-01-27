@@ -35,6 +35,7 @@ import { Input } from "./components/ui/input";
 import { getRandomTrainerName } from "./names";
 import { useState } from "react";
 import { Slider } from "./components/ui/slider";
+import Joycon from "./components/Joycon";
 
 const App: React.FC = () => {
   const [_, setTpPos] = useAtom(teleportPosition);
@@ -61,6 +62,7 @@ const App: React.FC = () => {
     <div className="App overflow-hidden relative bg-black">
       <MusicPlayer />
       <Game />
+      {navigator.maxTouchPoints >= 2 && <Joycon />}
       <div className="absolute top-0 right-0 z-10 m-2 flex flex-row gap-2">
         <div className="flex flex-col items-center gap-2">
           <Button

@@ -25,9 +25,7 @@ export class RubyWorldServer extends Server {
 		hibernate: true,
 	};
 
-	onStart(): void | Promise<void> {
-		console.log('Server started');
-	}
+	onStart(): void | Promise<void> {}
 
 	onClose(connection: Connection, code: number, reason: string, wasClean: boolean): void | Promise<void> {
 		console.log('Connection closed', connection.id, code, reason, wasClean);
