@@ -1,5 +1,5 @@
 import { playerCanMoveTo } from "./collision";
-import { playerName, spriteIndex, store, teleportPosition } from "./state";
+import { playerName, spriteIndex, store, teleportPosition } from "../state";
 import { GameEngine } from "./GameEngine";
 import socket from "./socket";
 import {

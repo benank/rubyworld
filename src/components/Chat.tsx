@@ -3,8 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Send, SendHorizonal } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import socket from "@/socket";
-import { ClientPacketType, ClientPlayerChatPacket } from "@/packets";
+import socket from "@/game/socket";
+import { ClientPacketType, ClientPlayerChatPacket } from "@/game/packets";
 import { localChatMessage, store } from "@/state";
 
 const Chat: React.FC = () => {

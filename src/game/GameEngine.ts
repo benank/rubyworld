@@ -6,7 +6,7 @@ import {
   isInGame,
   localChatMessage,
   store,
-} from "./state";
+} from "../state";
 import { LocalPlayer } from "./LocalPlayer";
 import socket from "./socket";
 import {

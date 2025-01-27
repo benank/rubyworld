@@ -1,6 +1,6 @@
-import { MAP_WIDTH, TILE_SIZE, MAP_HEIGHT } from "./config";
-import { collisionLoadProgress, gameLoaded, store } from "./state";
-import { downloadWithProgress } from "./utils";
+import { MAP_WIDTH, TILE_SIZE, MAP_HEIGHT } from "@/game/config";
+import { collisionLoadProgress, gameLoaded, store } from "@/state";
+import { downloadWithProgress } from "@/utils";
 import collisionPath from "/assets/collision.txt";
 
 const MAX_X = MAP_WIDTH / TILE_SIZE;

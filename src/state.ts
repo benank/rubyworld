@@ -1,5 +1,5 @@
 import { atom, getDefaultStore, useAtom } from "jotai";
-import { getRandomTrainerName } from "./names";
+import { getRandomTrainerName } from "./game/names";
 
 export const store = getDefaultStore();
 

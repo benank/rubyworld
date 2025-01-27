@@ -1,5 +1,5 @@
 import * as React from "react";
-import Game from "./Game";
+import Game from "./components/Game";
 import { Button } from "./components/ui/button";
 import { MapIcon, RefreshCwIcon, Volume2Icon, VolumeIcon } from "lucide-react";
 import {
@@ -32,7 +32,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "./components/ui/input";
-import { getRandomTrainerName } from "./names";
+import { getRandomTrainerName } from "./game/names";
 import { useState } from "react";
 import { Slider } from "./components/ui/slider";
 import Joycon from "./components/Joycon";

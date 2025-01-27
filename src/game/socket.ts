@@ -1,5 +1,5 @@
 import { PartySocket } from "partysocket";
-import { isDev } from "./env";
+import { isDev } from "../env";
 import { ClientPacket, ServerPacket } from "./packets";
 
 const HOST_URL = isDev
