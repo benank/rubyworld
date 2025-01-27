@@ -5,7 +5,7 @@
 <img width="809" alt="image" src="https://github.com/user-attachments/assets/74b1a297-7c5d-4393-b6cb-8792ce88d0e7" />
 
 
-Realtime online 2D game world. Built with Cloudflare Durable Objects & Pages, React, and Typescript. Inspired by Pokémon Ruby.
+Realtime online 2D game world. Built with Cloudflare Durable Objects & Pages, React, and Typescript. Inspired by Pokémon Ruby. Built in a weekend for fun.
 
 Uses:
  - Cloudflare Durable Objects + Cloudflare Workers + PartyKit for realtime communication via websockets
