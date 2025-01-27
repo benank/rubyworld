@@ -49,8 +49,8 @@ export class Player {
         const img = new Image();
         img.src =
           dir === "right"
-            ? `/assets/sprites/player1/left${type}.png`
-            : `/assets/sprites/player1/${dir}${type}.png`;
+            ? `/assets/sprites/player${this.spriteIndex}/left${type}.png`
+            : `/assets/sprites/player${this.spriteIndex}/${dir}${type}.png`;
         img.onload = () => {
           loadedCount++;
           if (dir === "right") {
@@ -155,7 +155,7 @@ export class Player {
   moveTo(newX: number, newY: number) {
     if (!this.isLocalPlayer) {
       // Make remote players fast if they move fast
-      this.speedUp = this.isMoving && this.movementProgress < 0.5;
+      this.speedUp = this.isMoving;
     }
 
     const dx = newX - this.x;

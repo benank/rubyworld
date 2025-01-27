@@ -1,6 +1,6 @@
 import { getDefaultStore } from "jotai";
 import { playerCanMoveTo } from "./collision";
-import { playerName, teleportPosition } from "./state";
+import { playerName, spriteIndex, teleportPosition } from "./state";
 import { GameEngine } from "./GameEngine";
 import socket from "./socket";
 import {
@@ -22,7 +22,7 @@ export class LocalPlayer extends Player {
       x,
       y,
       name: store.get(playerName),
-      spriteIndex: 1,
+      spriteIndex: store.get(spriteIndex),
     });
     this.isLocalPlayer = true;
     this.gameEngine = gameEngine;
