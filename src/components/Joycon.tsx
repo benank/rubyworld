@@ -41,7 +41,7 @@ const Joycon: React.FC = () => {
   ];
 
   return (
-    <div className="absolute bottom-4 right-4 w-40 h-40 bg-black/25 bg-opacity-50 rounded-full shadow-lg z-20 p-2">
+    <div className="absolute bottom-4 right-4 w-40 h-40 bg-black/25 bg-opacity-50 rounded-full shadow-lg z-20 p-2 select-none">
       <div className="relative w-full h-full">
         {buttonConfig.map(({ direction, icon: Icon, position }) => (
           <button

@@ -21,7 +21,7 @@ export class GameEngine {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   public static readonly tileSize = TILE_SIZE;
-  public static readonly scale = 4;
+  public static readonly scale = 3;
   public static readonly mapWidth: number = MAP_WIDTH / this.tileSize;
   public static readonly mapHeight: number = MAP_HEIGHT / this.tileSize;
   private localPlayer?: LocalPlayer;
