@@ -1,7 +1,11 @@
 import { Player } from "./Player";
 import { TILE_SIZE, MAP_WIDTH, MAP_HEIGHT } from "./config";
 import { getDefaultStore } from "jotai";
-import { backgroundImageLoadProgress, firstFrameRendered } from "./state";
+import {
+  backgroundImageLoadProgress,
+  firstFrameRendered,
+  isInGame,
+} from "./state";
 import { LocalPlayer } from "./LocalPlayer";
 import socket from "./socket";
 import {
@@ -20,10 +24,10 @@ export class GameEngine {
   public static readonly scale = 4;
   public static readonly mapWidth: number = MAP_WIDTH / this.tileSize;
   public static readonly mapHeight: number = MAP_HEIGHT / this.tileSize;
-  private localPlayer: LocalPlayer;
+  private localPlayer?: LocalPlayer;
   private players: Player[] = [];
-  private cameraX = 0;
-  private cameraY = 0;
+  private cameraX = 55;
+  private cameraY = 250;
   private chunks: Map<string, HTMLImageElement> = new Map();
   private loadingChunks: Set<string> = new Set();
   private store = getDefaultStore();
@@ -35,13 +39,14 @@ export class GameEngine {
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d")!;
-    this.localPlayer = new LocalPlayer(
-      Math.floor(Math.random() * 12) + 55,
-      Math.floor(Math.random() * 3) + 249,
-      this
-    );
     this.setupCanvas();
     socket.recv(this.onServerPacket.bind(this));
+
+    this.store.sub(isInGame, () => {
+      if (this.store.get(isInGame) && !this.localPlayer) {
+        this.createLocalPlayer();
+      }
+    });
   }
 
   private onServerPacket(packet: ServerPacket) {
@@ -157,12 +162,12 @@ export class GameEngine {
   }
 
   private fixedUpdate(dt: number) {
-    this.localPlayer.update(dt);
+    this.localPlayer?.update(dt);
     this.players.forEach((entity) => entity.update(dt));
   }
 
   private updateCamera() {
-    const playerPos = this.localPlayer.getPosition();
+    const playerPos = this.localPlayer?.getPosition() ?? { x: 60, y: 250 };
     this.cameraX =
       playerPos.x * GameEngine.tileSize * GameEngine.scale -
       this.canvas.width / 2;
@@ -221,7 +226,7 @@ export class GameEngine {
     });
 
     // Render local player
-    this.localPlayer.render(this.ctx, GameEngine.tileSize * GameEngine.scale);
+    this.localPlayer?.render(this.ctx, GameEngine.tileSize * GameEngine.scale);
 
     this.ctx.restore();
 
@@ -232,7 +237,7 @@ export class GameEngine {
   }
 
   public handleInput(e: KeyboardEvent, isKeyDown: boolean) {
-    this.localPlayer.handleInput(e, isKeyDown);
+    this.localPlayer?.handleInput(e, isKeyDown);
   }
 
   public addPlayer(player: Player) {
@@ -254,6 +259,14 @@ export class GameEngine {
 
   public getMapSize() {
     return { width: GameEngine.mapWidth, height: GameEngine.mapHeight };
+  }
+
+  public createLocalPlayer() {
+    this.localPlayer = new LocalPlayer(
+      Math.floor(Math.random() * 12) + 55,
+      Math.floor(Math.random() * 3) + 249,
+      this
+    );
   }
 
   public destroy() {

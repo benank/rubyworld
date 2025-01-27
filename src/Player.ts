@@ -94,14 +94,6 @@ export class Player {
 
   render(ctx: CanvasRenderingContext2D, tileSize: number) {
     if (!this.loadedSprites) {
-      // Render a placeholder if sprites are not loaded
-      ctx.fillStyle = "gray";
-      ctx.fillRect(
-        this.x * tileSize,
-        this.y * tileSize,
-        tileSize,
-        tileSize * 2
-      );
       return;
     }
 
@@ -126,12 +118,44 @@ export class Player {
 
     const sprite = this.sprites[this.facingDirection][frameIndex];
     ctx.drawImage(sprite, drawX, drawY, tileSize, tileSize * 2);
+
+    // Render player name
+    ctx.font = "14px 'Press Start 2P'";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.imageSmoothingEnabled = false;
+
+    // Measure text width
+    const maxWidth = 400;
+    let displayName = this.name;
+    let textWidth = ctx.measureText(displayName).width;
+
+    // Truncate name if it exceeds maxWidth
+    if (textWidth > maxWidth) {
+      while (textWidth > maxWidth && displayName.length > 0) {
+        displayName = displayName.slice(0, -1);
+        textWidth = ctx.measureText(displayName + "...").width;
+      }
+      displayName += "...";
+    }
+
+    const textX = Math.round(drawX + tileSize / 2);
+    const textY = Math.round(drawY + 30);
+
+    // Draw text stroke
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 3;
+    ctx.strokeText(displayName, textX, textY);
+
+    // Draw text fill
+    ctx.fillStyle = "white";
+    ctx.fillText(displayName, textX, textY);
   }
 
   moveTo(newX: number, newY: number) {
     if (!this.isLocalPlayer) {
       // Make remote players fast if they move fast
-      this.speedUp = this.isMoving || this.movementProgress > 0;
+      this.speedUp = this.isMoving && this.movementProgress < 0.5;
     }
 
     const dx = newX - this.x;

@@ -1,6 +1,6 @@
 import { getDefaultStore } from "jotai";
 import { playerCanMoveTo } from "./collision";
-import { teleportPosition } from "./state";
+import { playerName, teleportPosition } from "./state";
 import { GameEngine } from "./GameEngine";
 import socket from "./socket";
 import {
@@ -10,9 +10,10 @@ import {
 } from "./packets";
 import { Player } from "./Player";
 
+const store = getDefaultStore();
+
 export class LocalPlayer extends Player {
   private currentDirection: string | null = null;
-  private store = getDefaultStore();
   private gameEngine: GameEngine;
 
   constructor(x: number, y: number, gameEngine: GameEngine) {
@@ -20,7 +21,7 @@ export class LocalPlayer extends Player {
       id: "LocalPlayer",
       x,
       y,
-      name: "Local Player",
+      name: store.get(playerName),
       spriteIndex: 1,
     });
     this.isLocalPlayer = true;
@@ -35,10 +36,10 @@ export class LocalPlayer extends Player {
       spriteIndex: this.spriteIndex,
     } satisfies ClientPlayerSpawnPacket);
 
-    this.store.sub(teleportPosition, () => {
+    store.sub(teleportPosition, () => {
       this.teleport(
-        this.store.get(teleportPosition).x * GameEngine.mapWidth,
-        this.store.get(teleportPosition).y * GameEngine.mapHeight
+        store.get(teleportPosition).x * GameEngine.mapWidth,
+        store.get(teleportPosition).y * GameEngine.mapHeight
       );
     });
   }
