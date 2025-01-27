@@ -143,7 +143,7 @@ const App: React.FC = () => {
                 </span>
               </div>
               <div className="flex flex-col gap-2 mb-6">
-                <span className="text-lg font-semibold">Character</span>
+                <span className="text-lg font-semibold text-center">Character</span>
                 <div className="flex flex-row justify-center items-center gap-4">
                   <Button
                     onClick={() => setSprite(1)}

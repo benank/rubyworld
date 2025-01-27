@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useRef } from "react";
 
 export const PreventPullToRefresh: React.FC<{ children: React.ReactNode }> = ({
