@@ -155,7 +155,7 @@ export class Player {
   moveTo(newX: number, newY: number) {
     if (!this.isLocalPlayer) {
       // Make remote players fast if they move fast
-      this.speedUp = this.isMoving;
+      this.speedUp = this.isMoving || this.movementProgress > 0;
     }
 
     const dx = newX - this.x;
