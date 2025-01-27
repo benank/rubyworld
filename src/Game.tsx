@@ -51,7 +51,7 @@ const Game: React.FC = () => {
   }, []);
 
   return (
-    <div className="h-full w-screen flex overflow-hidden items-center justify-center bg-gray-900 select-none relative isolate z-10">
+    <div className="h-full w-screen flex overflow-hidden items-center justify-center bg-gray-900 select-none relative isolate">
       <canvas ref={canvasRef} className="z-10" />
       <div className="absolute inset-0 w-full h-full overflow-hidden select-none"></div>
     </div>

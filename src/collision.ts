@@ -1,18 +1,11 @@
-import { getDefaultStore } from "jotai";
 import { MAP_WIDTH, TILE_SIZE, MAP_HEIGHT } from "./config";
-import { collisionLoadProgress, gameLoaded } from "./state";
+import { collisionLoadProgress, gameLoaded, store } from "./state";
 import { downloadWithProgress } from "./utils";
 import collisionPath from "/assets/collision.txt";
-
-const store = getDefaultStore();
 
 const MAX_X = MAP_WIDTH / TILE_SIZE;
 const MAX_Y = MAP_HEIGHT / TILE_SIZE;
 let collisionMap: string[][] = [];
-
-store.sub(gameLoaded, () => {
-  console.log(`Game loaded: ${store.get(gameLoaded)}`);
-});
 
 const loadCollisionMap = async () => {
   const collisionFile = await downloadWithProgress(

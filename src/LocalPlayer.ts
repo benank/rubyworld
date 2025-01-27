@@ -1,6 +1,5 @@
-import { getDefaultStore } from "jotai";
 import { playerCanMoveTo } from "./collision";
-import { playerName, spriteIndex, teleportPosition } from "./state";
+import { playerName, spriteIndex, store, teleportPosition } from "./state";
 import { GameEngine } from "./GameEngine";
 import socket from "./socket";
 import {
@@ -9,8 +8,7 @@ import {
   ClientPlayerSpawnPacket,
 } from "./packets";
 import { Player } from "./Player";
-
-const store = getDefaultStore();
+import { LOCALPLAYER_ID } from "./config";
 
 export class LocalPlayer extends Player {
   private currentDirection: string | null = null;
@@ -18,7 +16,7 @@ export class LocalPlayer extends Player {
 
   constructor(x: number, y: number, gameEngine: GameEngine) {
     super({
-      id: "LocalPlayer",
+      id: LOCALPLAYER_ID,
       x,
       y,
       name: store.get(playerName),

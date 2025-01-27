@@ -1,3 +1,4 @@
+import { CHAT_MESSAGE_TIMEOUT_MS } from "./config";
 import { ServerPlayer } from "./packets";
 
 export class Player {
@@ -14,6 +15,8 @@ export class Player {
   protected movementProgress = 0;
   protected facingDirection: "left" | "right" | "up" | "down" = "down";
   protected speedUp = false;
+  protected chatMessage: string | null = null;
+  protected chatMessageTimeout: number | null = null;
 
   protected sprites: {
     [key: string]: HTMLImageElement[];
@@ -150,6 +153,87 @@ export class Player {
     // Draw text fill
     ctx.fillStyle = "white";
     ctx.fillText(displayName, textX, textY);
+
+    // Render chat bubble if there's a message
+    if (this.chatMessage) {
+      const maxBubbleWidth = 300;
+      const lineHeight = 20;
+      const maxLines = 3;
+      const padding = 8;
+
+      // Measure and wrap text
+      ctx.font = "12px 'Press Start 2P'";
+      const words = this.chatMessage.split(" ");
+      let lines = [];
+      let currentLine = "";
+
+      for (let word of words) {
+        const testLine = currentLine + (currentLine ? " " : "") + word;
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxBubbleWidth - padding * 2) {
+          if (currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+          } else {
+            lines.push(testLine);
+            currentLine = "";
+          }
+          if (lines.length === maxLines) break;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine && lines.length < maxLines) {
+        lines.push(currentLine);
+      }
+
+      // Truncate if necessary
+      if (lines.length > maxLines) {
+        lines = lines.slice(0, maxLines);
+        lines[maxLines - 1] = lines[maxLines - 1].slice(0, -3) + "...";
+      }
+
+      // Calculate bubble dimensions
+      const bubbleWidth =
+        Math.max(...lines.map((line) => ctx.measureText(line).width)) +
+        padding * 2;
+      const bubbleHeight = lines.length * lineHeight + padding * 2;
+
+      const bubbleX = Math.round(drawX + tileSize / 2 - bubbleWidth / 2);
+      const bubbleY = Math.round(drawY - bubbleHeight - 10);
+
+      // Draw bubble background
+      ctx.fillStyle = "white";
+      ctx.strokeStyle = "#a0a0a0";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      // Draw chat message
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillStyle = "black";
+
+      lines.forEach((line, index) => {
+        ctx.fillText(
+          line,
+          bubbleX + padding,
+          bubbleY + padding + index * lineHeight
+        );
+      });
+
+      // Draw tail of the bubble
+      ctx.beginPath();
+      ctx.fillStyle = "white";
+      ctx.moveTo(bubbleX + bubbleWidth / 2 - 8, bubbleY + bubbleHeight);
+      ctx.lineTo(bubbleX + bubbleWidth / 2, bubbleY + bubbleHeight + 8);
+      ctx.lineTo(bubbleX + bubbleWidth / 2 + 8, bubbleY + bubbleHeight);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
   }
 
   moveTo(newX: number, newY: number) {
@@ -184,5 +268,17 @@ export class Player {
       ? this.y + (this.targetY - this.y) * this.movementProgress
       : this.y;
     return { x, y };
+  }
+
+  addChatMessage(message: string) {
+    this.chatMessage = message;
+
+    if (this.chatMessageTimeout) {
+      window.clearTimeout(this.chatMessageTimeout);
+    }
+
+    this.chatMessageTimeout = window.setTimeout(() => {
+      this.chatMessage = null;
+    }, CHAT_MESSAGE_TIMEOUT_MS);
   }
 }

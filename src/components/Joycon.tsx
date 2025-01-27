@@ -5,7 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useKeyPress } from "../hooks/useKeyPress";
+import { useKeyPress } from "../hooks/use-key-press";
 
 const Joycon: React.FC = () => {
   const simulateKeyEvent = useKeyPress();

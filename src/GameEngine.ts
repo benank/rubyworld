@@ -1,10 +1,11 @@
 import { Player } from "./Player";
-import { TILE_SIZE, MAP_WIDTH, MAP_HEIGHT } from "./config";
-import { getDefaultStore } from "jotai";
+import { TILE_SIZE, MAP_WIDTH, MAP_HEIGHT, LOCALPLAYER_ID } from "./config";
 import {
   backgroundImageLoadProgress,
   firstFrameRendered,
   isInGame,
+  localChatMessage,
+  store,
 } from "./state";
 import { LocalPlayer } from "./LocalPlayer";
 import socket from "./socket";
@@ -30,7 +31,6 @@ export class GameEngine {
   private cameraY = 250;
   private chunks: Map<string, HTMLImageElement> = new Map();
   private loadingChunks: Set<string> = new Set();
-  private store = getDefaultStore();
   private firstFrameRendered = false;
 
   private fixedDeltaTime: number = 1 / 60; // 60 updates per second
@@ -42,10 +42,16 @@ export class GameEngine {
     this.setupCanvas();
     socket.recv(this.onServerPacket.bind(this));
 
-    this.store.sub(isInGame, () => {
-      if (this.store.get(isInGame) && !this.localPlayer) {
+    store.sub(isInGame, () => {
+      if (store.get(isInGame) && !this.localPlayer) {
         this.createLocalPlayer();
       }
+    });
+
+    store.sub(localChatMessage, () => {
+      const msg = store.get(localChatMessage);
+      if (!msg) return;
+      this.addChatMessage(LOCALPLAYER_ID, msg);
     });
   }
 
@@ -64,7 +70,16 @@ export class GameEngine {
         this.addPlayer(new Player(packet.player));
         break;
       case ServerPacketType.PlayerChat:
+        this.addChatMessage(packet.id, packet.message);
         break;
+    }
+  }
+
+  private addChatMessage(id: string, message: string) {
+    if (id === LOCALPLAYER_ID) {
+      this.localPlayer?.addChatMessage(message);
+    } else {
+      this.players.find((p) => p.id === id)?.addChatMessage(message);
     }
   }
 
@@ -139,13 +154,13 @@ export class GameEngine {
     }
 
     // Update loading progress
-    if (this.store.get(backgroundImageLoadProgress) < 100) {
+    if (store.get(backgroundImageLoadProgress) < 100) {
       const totalChunks = VISIBLE_CHUNKS * VISIBLE_CHUNKS;
       const loadedChunks = [...visibleChunkKeys].filter((key) =>
         this.chunks.has(key)
       ).length;
       const progress = Math.round((loadedChunks / totalChunks) * 100);
-      this.store.set(backgroundImageLoadProgress, progress);
+      store.set(backgroundImageLoadProgress, progress);
     }
   }
 
@@ -231,7 +246,7 @@ export class GameEngine {
     this.ctx.restore();
 
     if (!this.firstFrameRendered) {
-      this.store.set(firstFrameRendered, true);
+      store.set(firstFrameRendered, true);
       this.firstFrameRendered = true;
     }
   }

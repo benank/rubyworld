@@ -47,13 +47,9 @@ class Socket {
     this.socket.send(message);
   }
 
-  private onOpen() {
-    console.log("Socket opened");
-  }
+  private onOpen() {}
 
-  private onClose() {
-    console.log("Socket closed");
-  }
+  private onClose() {}
 
   private onError(error: Event) {
     console.error("Socket error", error);

@@ -37,6 +37,7 @@ import { useState } from "react";
 import { Slider } from "./components/ui/slider";
 import Joycon from "./components/Joycon";
 import { PreventPullToRefresh } from "./components/PreventPullToRefresh";
+import Chat from "./components/Chat";
 
 const App: React.FC = () => {
   const [_, setTpPos] = useAtom(teleportPosition);
@@ -65,58 +66,61 @@ const App: React.FC = () => {
         <MusicPlayer />
         <Game />
         {navigator.maxTouchPoints >= 2 && <Joycon />}
-        <div className="absolute top-0 right-0 z-10 m-2 flex flex-row gap-2">
-          <div className="flex flex-col items-center gap-2">
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={() => setVolumeOpen(!volumeOpen)}
-            >
-              <Volume2Icon />
-            </Button>
-            {volumeOpen && (
-              <Slider
-                defaultValue={[volume]}
-                min={0}
-                max={1}
-                step={0.05}
-                orientation="vertical"
-                className="h-20 w-1.5"
-                onValueChange={(value) => setVolume(value[0])}
-              />
-            )}
-          </div>
-          <Drawer>
-            <DrawerTrigger asChild>
-              <Button variant="secondary" size="icon">
-                <MapIcon />
+        {inGame && (
+          <div className="absolute top-0 right-0 z-10 m-2 flex flex-row gap-2">
+            <div className="flex flex-col items-center gap-2">
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => setVolumeOpen(!volumeOpen)}
+              >
+                <Volume2Icon />
               </Button>
-            </DrawerTrigger>
-            <DrawerContent>
-              <div className="mx-auto w-full max-w-lg">
-                <DrawerHeader>
-                  <DrawerTitle>World Map</DrawerTitle>
-                  <DrawerDescription>
-                    Tap anywhere to teleport.
-                  </DrawerDescription>
-                </DrawerHeader>
-                <div className="p-4 pb-10">
-                  <div className="flex items-center justify-center space-x-2">
-                    <DrawerClose asChild>
-                      <button className="w-full" onClick={handleMapClick}>
-                        <img
-                          src={minimap}
-                          alt="minimap"
-                          className="w-full pixelPerfect rounded-lg"
-                        />
-                      </button>
-                    </DrawerClose>
+              {volumeOpen && (
+                <Slider
+                  defaultValue={[volume]}
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  orientation="vertical"
+                  className="h-20 w-1.5"
+                  onValueChange={(value) => setVolume(value[0])}
+                />
+              )}
+            </div>
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button variant="secondary" size="icon">
+                  <MapIcon />
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent>
+                <div className="mx-auto w-full max-w-lg">
+                  <DrawerHeader>
+                    <DrawerTitle>World Map</DrawerTitle>
+                    <DrawerDescription>
+                      Tap anywhere to teleport.
+                    </DrawerDescription>
+                  </DrawerHeader>
+                  <div className="p-4 pb-10">
+                    <div className="flex items-center justify-center space-x-2">
+                      <DrawerClose asChild>
+                        <button className="w-full" onClick={handleMapClick}>
+                          <img
+                            src={minimap}
+                            alt="minimap"
+                            className="w-full pixelPerfect rounded-lg"
+                          />
+                        </button>
+                      </DrawerClose>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </DrawerContent>
-          </Drawer>
-        </div>
+              </DrawerContent>
+            </Drawer>
+          </div>
+        )}
+        {inGame && <Chat />}
         <Dialog open={!inGame}>
           <DialogContent>
             <DialogHeader>
@@ -143,7 +147,9 @@ const App: React.FC = () => {
                 </span>
               </div>
               <div className="flex flex-col gap-2 mb-6">
-                <span className="text-lg font-semibold text-center">Character</span>
+                <span className="text-lg font-semibold text-center">
+                  Character
+                </span>
                 <div className="flex flex-row justify-center items-center gap-4">
                   <Button
                     onClick={() => setSprite(1)}

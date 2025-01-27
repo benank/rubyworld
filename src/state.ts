@@ -1,5 +1,7 @@
-import { atom, useAtom } from "jotai";
+import { atom, getDefaultStore, useAtom } from "jotai";
 import { getRandomTrainerName } from "./names";
+
+export const store = getDefaultStore();
 
 export const backgroundImageLoadProgress = atom(0);
 export const collisionLoadProgress = atom(0);
@@ -18,3 +20,5 @@ export const playerName = atom(getRandomTrainerName());
 export const isInGame = atom(false);
 export const spriteIndex = atom(1);
 export const musicVolume = atom(0.5);
+export const chatOpen = atom(false);
+export const localChatMessage = atom("");
