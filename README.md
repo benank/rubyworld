@@ -16,8 +16,9 @@ Uses:
 
 ## Developing
 
-1. Install all packages with `npm install`
+1. Install all packages with `npm install` (and so the same in the `server` directory)
 2. Run `npm run dev` to start the development server.
+3. In another terminal, navigate into the server directory and run `npm run dev` to start the realtime server.
 
 ## Building
 
